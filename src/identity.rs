@@ -1,8 +1,10 @@
+use alloc::boxed::Box;
 use arrayref::array_ref;
 use ed25519_compact::{
     KeyPair, Noise, PublicKey, SecretKey, Signature,
     x25519::{self, DHOutput},
 };
+use once_cell::race::OnceBox;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -47,14 +49,14 @@ impl LocalIdentity {
     pub fn as_foreign(&self) -> ForeignIdentity {
         ForeignIdentity {
             verify_key: self.signing_keys.pk,
-            encrypt_key: self.encryption_keys.pk,
+            encrypt_key: OnceBox::new(), // encrypt_key: self.encryption_keys.pk,
         }
     }
 }
 
 pub struct ForeignIdentity {
     pub verify_key: PublicKey,
-    pub encrypt_key: x25519::PublicKey,
+    pub encrypt_key: OnceBox<x25519::PublicKey>, // pub encrypt_key: x25519::PublicKey,
 }
 
 impl ForeignIdentity {
@@ -62,13 +64,22 @@ impl ForeignIdentity {
         let pk = PublicKey::new(pk);
         ForeignIdentity {
             verify_key: pk,
-            encrypt_key: x25519::PublicKey::from_ed25519(&pk)
-                .unwrap_or(x25519::PublicKey::base_point()), // todo: this is invalid
+            encrypt_key: OnceBox::new(), // encrypt_key: x25519::PublicKey::from_ed25519(&pk)
+                                         //     .unwrap_or(x25519::PublicKey::base_point()), // todo: this is invalid
         }
     }
 
     pub fn verify(&self, data: &[u8], signature: &Signature) -> bool {
         self.verify_key.verify(data, signature).is_ok()
+    }
+
+    pub fn encrypt_key(&self) -> &x25519::PublicKey {
+        self.encrypt_key.get_or_init(|| {
+            Box::new(
+                x25519::PublicKey::from_ed25519(&self.verify_key)
+                    .unwrap_or(x25519::PublicKey::base_point()),
+            )
+        })
     }
 }
 
@@ -127,7 +138,7 @@ impl LocalIdentity {
     }
 
     pub fn shared_secret(&self, other: &ForeignIdentity) -> DHOutput {
-        other.encrypt_key.dh(&self.encryption_keys.sk).unwrap()
+        other.encrypt_key().dh(&self.encryption_keys.sk).unwrap()
     }
 
     pub fn sign(&self, data: &[u8]) -> Signature {
