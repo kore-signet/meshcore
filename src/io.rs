@@ -42,7 +42,7 @@ impl<'a> SliceWriter<'a> {
         self.cursor += 4;
     }
 
-     pub fn write_i16_le(&mut self, val: i16) {
+    pub fn write_i16_le(&mut self, val: i16) {
         self.out[self.cursor..self.cursor + 2].copy_from_slice(&val.to_le_bytes());
         self.cursor += 2;
     }

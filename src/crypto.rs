@@ -10,6 +10,7 @@ type Aes128EcbEnc = ecb::Encryptor<aes::Aes128>;
 type Aes128EcbDec = ecb::Decryptor<aes::Aes128>;
 
 pub struct ChannelKeys {
+    pub hash: u8,
     pub secret: [u8; 16],
 }
 
@@ -19,17 +20,22 @@ impl ChannelKeys {
             .unwrap()
             .try_into()
             .unwrap();
-        // let mut master_key = [0u8; 32];
-        // master_key[0..16].copy_from_slice(&key);
-        // master_key[16..].copy_from_slice(&key);
-        ChannelKeys { secret: key }
+
+        ChannelKeys::from_secret(key)
     }
 
     pub fn from_hashtag(channel: &str) -> ChannelKeys {
         let secret: [u8; 16] = Sha256::digest(channel)[0..16].try_into().unwrap();
-        // let (aes_key, hmac_key) = arrayref::array_refs![&master_key, 16, 16];
 
-        ChannelKeys { secret }
+        ChannelKeys::from_secret(secret)
+    }
+
+    pub fn from_secret(secret: [u8; 16]) -> ChannelKeys {
+        let digest_of_key = Sha256::digest(secret);
+        ChannelKeys {
+            hash: digest_of_key[0],
+            secret,
+        }
     }
 }
 
