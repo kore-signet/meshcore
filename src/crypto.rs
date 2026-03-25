@@ -9,6 +9,7 @@ use crate::{DecodeResult, PacketPayload, SerDeser, io::ByteVecImpl};
 type Aes128EcbEnc = ecb::Encryptor<aes::Aes128>;
 type Aes128EcbDec = ecb::Decryptor<aes::Aes128>;
 
+#[derive(Copy, Clone)]
 pub struct ChannelKeys {
     pub hash: u8,
     pub secret: [u8; 16],

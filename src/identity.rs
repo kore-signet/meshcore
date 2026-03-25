@@ -12,6 +12,7 @@ use crate::{
     payloads::{Advert, AdvertisementExtraData, AnonymousRequest, EncryptedMessageWithDst},
 };
 
+#[derive(Clone)]
 pub struct LocalIdentity {
     pub signing_keys: ed25519_compact::KeyPair,
     pub encryption_keys: ed25519_compact::x25519::KeyPair,
@@ -54,6 +55,7 @@ impl LocalIdentity {
     }
 }
 
+#[derive(Clone)]
 pub struct ForeignIdentity {
     pub verify_key: PublicKey,
     pub encrypt_key: OnceBox<x25519::PublicKey>, // pub encrypt_key: x25519::PublicKey,
