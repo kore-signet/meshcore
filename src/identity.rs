@@ -157,13 +157,26 @@ impl LocalIdentity {
         P: SerDeser + Encryptable,
     {
         let key = self.shared_secret(destination);
+        self.make_message_with_key::<P, B>(message, destination.verify_key[0], *key, scratch).await
+    }
+
+    pub async fn make_message_with_key<'a, 's, P, B: AesImpl>(
+        &self,
+        message: &P::Representation<'a>,
+        dest_hash: u8,
+        key: [u8; 32],
+        scratch: &'s mut impl ByteVecImpl,
+    ) -> Result<EncryptedMessageWithDst<'s, P>, B::Error>
+    where
+        P: SerDeser + Encryptable,
+    {
         let aes_key = array_ref![&key, 0, 16];
         let mac_key = array_ref![&key, 0, 32];
 
         let message_encrypted = P::encrypt::<B>(message, aes_key, scratch).await?;
         let mac = hmac_sha256::HMAC::mac(message_encrypted, mac_key);
         Ok(EncryptedMessageWithDst {
-            destination_hash: destination.verify_key[0],
+            destination_hash: dest_hash,
             source_hash: self.signing_keys.pk[0],
             mac: *array_ref![&mac, 0, 2],
             ciphertext: alloc::borrow::Cow::Borrowed(message_encrypted),
@@ -181,13 +194,26 @@ impl LocalIdentity {
         P: SerDeser + Encryptable,
     {
         let key = self.shared_secret(destination);
+        self.make_anon_req_with_key::<P,B>(message, destination.verify_key[0], *key, scratch).await
+    }
+
+    pub async fn make_anon_req_with_key<'a, 's, P, B: AesImpl>(
+        &self,
+        message: &P::Representation<'a>,
+        dest_hash: u8,
+        key: [u8; 32],
+        scratch: &'s mut impl ByteVecImpl,
+    ) -> Result<AnonymousRequest<'s, P>, B::Error>
+    where
+        P: SerDeser + Encryptable,
+    {
         let aes_key = array_ref![&key, 0, 16];
         let mac_key = array_ref![&key, 0, 32];
 
         let message_encrypted = P::encrypt::<B>(message, aes_key, scratch).await?;
         let mac = hmac_sha256::HMAC::mac(message_encrypted, mac_key);
         Ok(AnonymousRequest {
-            destination_hash: destination.verify_key[0],
+            destination_hash: dest_hash,
             sender_key: *self.signing_keys.pk,
             mac: *array_ref![&mac, 0, 2],
             ciphertext: alloc::borrow::Cow::Borrowed(message_encrypted),
