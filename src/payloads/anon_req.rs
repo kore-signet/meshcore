@@ -87,7 +87,7 @@ impl<'a, P: SerDeser + Encryptable> ContainsEncryptable for AnonymousRequest<'a,
     }
 }
 
-impl<'a, P: SerDeser + Encryptable + PacketPayload> VerifiablePayload for AnonymousRequest<'a, P> {
+impl<'a, P: SerDeser + Encryptable> VerifiablePayload for AnonymousRequest<'a, P> {
     fn verify<H: HmacImpl>(&self, mac_key: &[u8]) -> bool {
         let mac = self.mac::<H>(mac_key);
 

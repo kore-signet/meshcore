@@ -99,6 +99,7 @@ pub enum PathHashMode {
     OneByte = 0b00,
     TwoByte = 0b01,
     ThreeByte = 0b10,
+    FourByte = 0b11, // unsupported? i think?
 }
 
 impl PathHashMode {
@@ -107,6 +108,7 @@ impl PathHashMode {
             PathHashMode::OneByte => 1,
             PathHashMode::TwoByte => 2,
             PathHashMode::ThreeByte => 3,
+            PathHashMode::FourByte => 4,
         }
     }
 }
@@ -127,7 +129,7 @@ impl<const SIZE: usize> core::fmt::Debug for PathNode<SIZE> {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Path<'a> {
-    mode: PathHashMode,
+    pub mode: PathHashMode,
     backing: Cow<'a, [u8]>,
 }
 
@@ -220,6 +222,9 @@ impl<'a> core::fmt::Debug for Path<'a> {
             }
             PathHashMode::ThreeByte => {
                 write!(f, "{:?}", &PathDebug(self.view_as::<3>().unwrap()))
+            }
+            PathHashMode::FourByte => {
+                write!(f, "{:?}", &PathDebug(self.view_as::<4>().unwrap()))
             }
         }
         // .field("backing", &self.backing).finish()

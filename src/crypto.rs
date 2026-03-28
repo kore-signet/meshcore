@@ -4,7 +4,7 @@ use aes::cipher::{BlockDecryptMut, BlockEncryptMut, KeyInit as _, block_padding:
 use alloc::{borrow::Cow, vec::Vec};
 use sha2::{Digest, Sha256};
 
-use crate::{DecodeResult, PacketPayload, SerDeser, io::ByteVecImpl};
+use crate::{DecodeResult, SerDeser, io::ByteVecImpl};
 
 type Aes128EcbEnc = ecb::Encryptor<aes::Aes128>;
 type Aes128EcbDec = ecb::Decryptor<aes::Aes128>;
@@ -40,7 +40,7 @@ impl ChannelKeys {
     }
 }
 
-pub trait VerifiablePayload: Sized + PacketPayload {
+pub trait VerifiablePayload: Sized {
     fn verify<H: HmacImpl>(&self, mac_key: &[u8]) -> bool;
 }
 

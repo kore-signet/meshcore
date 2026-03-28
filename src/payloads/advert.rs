@@ -4,6 +4,7 @@ use crate::{
 };
 use alloc::borrow::Cow;
 use bitflags::bitflags;
+use modular_bitfield::Specifier;
 
 pub struct Advert<'a> {
     pub public_key: [u8; 32],
@@ -68,6 +69,17 @@ pub struct AdvertisementExtraData<'a> {
     pub feature_1: Option<[u8; 2]>,
     pub feature_2: Option<[u8; 2]>,
     pub name: Option<Cow<'a, [u8]>>,
+}
+
+#[derive(Clone, Copy, Debug, Specifier)]
+#[repr(u8)]
+#[bits = 3]
+pub enum AdvertType {
+    None = 0x00,
+    ChatNode = 0x01,
+    Repeater = 0x02,
+    RoomServer = 0x03,
+    Sensor = 0x04,
 }
 
 bitflags! {

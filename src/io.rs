@@ -1,8 +1,8 @@
 use core::ops::{Deref, DerefMut};
 
-use alloc::vec::Vec;
+use alloc::{borrow::Cow, vec::Vec};
 
-use crate::{DecodeError, DecodeResult};
+use crate::{DecodeError, DecodeResult, EncodeError, SerDeser, crypto::Encryptable};
 
 pub struct SliceWriter<'a> {
     out: &'a mut [u8],
@@ -76,6 +76,7 @@ impl<'a> SliceWriter<'a> {
 }
 
 pub trait TinyReadExt<'a> {
+    fn read_i8(&mut self) -> DecodeResult<i8>;
     fn read_u8(&mut self) -> DecodeResult<u8>;
     fn read_u16_le(&mut self) -> DecodeResult<u16>;
     fn read_u32_le(&mut self) -> DecodeResult<u32>;
@@ -84,6 +85,10 @@ pub trait TinyReadExt<'a> {
 }
 
 impl<'a> TinyReadExt<'a> for &'a [u8] {
+    fn read_i8(&mut self) -> DecodeResult<i8> {
+        self.read_chunk::<1>().copied().map(i8::from_le_bytes)
+    }
+
     fn read_u8(&mut self) -> DecodeResult<u8> {
         self.split_off_first()
             .copied()
@@ -158,3 +163,32 @@ impl<'a, const N: usize> ByteVecImpl for heapless::Vec<u8, N> {
         self.clear();
     }
 }
+
+impl<'a> SerDeser for Cow<'a, [u8]> {
+    type Representation<'data> = Cow<'data, [u8]>;
+
+    fn encode_size<'data>(object: &Self::Representation<'data>) -> usize {
+        object.len()
+    }
+
+    fn encode<'data, 'out>(
+        object: &Self::Representation<'data>,
+        out: &'out mut [u8],
+    ) -> crate::EncodeResult<&'out [u8]> {
+        if out.len() < object.len() {
+            return Err(EncodeError::BufferTooSmall);
+        }
+
+        let mut out = SliceWriter::new(out);
+
+        out.write_slice(object);
+
+        Ok(out.finish())
+    }
+
+    fn decode<'data>(data: &'data [u8]) -> DecodeResult<Self::Representation<'data>> {
+        Ok(Cow::Borrowed(data))
+    }
+}
+
+impl<'a> Encryptable for Cow<'a, [u8]> {}

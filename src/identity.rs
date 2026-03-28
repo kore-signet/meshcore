@@ -157,7 +157,8 @@ impl LocalIdentity {
         P: SerDeser + Encryptable,
     {
         let key = self.shared_secret(destination);
-        self.make_message_with_key::<P, B>(message, destination.verify_key[0], *key, scratch).await
+        self.make_message_with_key::<P, B>(message, destination.verify_key[0], *key, scratch)
+            .await
     }
 
     pub async fn make_message_with_key<'a, 's, P, B: AesImpl>(
@@ -194,7 +195,8 @@ impl LocalIdentity {
         P: SerDeser + Encryptable,
     {
         let key = self.shared_secret(destination);
-        self.make_anon_req_with_key::<P,B>(message, destination.verify_key[0], *key, scratch).await
+        self.make_anon_req_with_key::<P, B>(message, destination.verify_key[0], *key, scratch)
+            .await
     }
 
     pub async fn make_anon_req_with_key<'a, 's, P, B: AesImpl>(
