@@ -328,6 +328,11 @@ impl<'a> SerDeser for Packet<'a> {
 
     fn decode<'data>(mut data: &'data [u8]) -> DecodeResult<Self::Representation<'data>> {
         let header = PacketHeader::from_bytes(*data.read_chunk::<1>()?);
+
+        if header.route_type_or_err().is_err() || header.payload_type_or_err().is_err() {
+            return Err(DecodeError::InvalidBitPattern);
+        }
+
         let transport_codes = if matches!(
             header.route_type(),
             RouteType::TransportDirect | RouteType::TransportFlood

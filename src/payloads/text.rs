@@ -95,9 +95,15 @@ impl<'a> SerDeser for TextMessageData<'a> {
     }
 
     fn decode<'data>(mut data: &'data [u8]) -> DecodeResult<TextMessageData<'data>> {
+        let timestamp = data.read_u32_le()?;
+        let text_header = TextHeader::from_bytes(*data.read_chunk::<1>()?);
+        if text_header.text_type_or_err().is_err() {
+            return Err(DecodeError::InvalidBitPattern);
+        }
+
         Ok(TextMessageData {
-            timestamp: data.read_u32_le()?,
-            header: TextHeader::from_bytes(*data.read_chunk::<1>()?),
+            timestamp,
+            header: text_header,
             message: Cow::Borrowed(data),
         })
     }

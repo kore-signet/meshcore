@@ -169,6 +169,7 @@ impl SerDeser for ControlPayload {
                 let flags = DiscoverReqFlags::from_bits(flags.extra())
                     .ok_or(DecodeError::InvalidBitPattern)?;
                 let filter = DiscoveryFilter::from_bytes([data.read_u8()?]);
+
                 let tag = data.read_chunk::<4>()?;
                 let since = if !data.is_empty() {
                     Some(data.read_u32_le()?)
