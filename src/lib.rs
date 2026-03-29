@@ -93,7 +93,7 @@ impl PathLen {
     }
 }
 
-#[derive(Specifier, Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Specifier, Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[bits = 2]
 pub enum PathHashMode {
     OneByte = 0b00,
@@ -343,6 +343,9 @@ impl<'a> SerDeser for Packet<'a> {
         };
 
         let path_len = PathLen::from_bytes([data.read_u8()?]);
+        if path_len.mode_or_err().map_err(|_| DecodeError::InvalidBitPattern)? == PathHashMode::FourByte {
+            return Err(DecodeError::InvalidBitPattern);
+        }
 
         let path = Cow::Borrowed(data.read_slice(path_len.byte_size())?);
 
