@@ -42,7 +42,7 @@ impl<'a> SerDeser for ReturnedPath<'a> {
         out.write_slice(object.path.raw_bytes());
 
         if let Some((extra_type, extra_data)) = object.extra.as_ref() {
-            out.write_u8((*extra_type as u8) << 2);
+            out.write_u8((*extra_type as u8));
             out.write_slice(extra_data);
         }
 
