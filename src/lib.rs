@@ -30,6 +30,7 @@ pub enum DecodeError {
     HmacMismatch,
     FailedDecrypt,
     InvalidBitPattern,
+    InvalidestBitPattern(u8),
     WrongPayloadType,
     Utf8,
 }
@@ -343,7 +344,11 @@ impl<'a> SerDeser for Packet<'a> {
         };
 
         let path_len = PathLen::from_bytes([data.read_u8()?]);
-        if path_len.mode_or_err().map_err(|_| DecodeError::InvalidBitPattern)? == PathHashMode::FourByte {
+        if path_len
+            .mode_or_err()
+            .map_err(|_| DecodeError::InvalidBitPattern)?
+            == PathHashMode::FourByte
+        {
             return Err(DecodeError::InvalidBitPattern);
         }
 

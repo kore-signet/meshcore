@@ -119,7 +119,7 @@ impl<'a> core::fmt::Debug for TextMessageData<'a> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("PlaintextMessage")
             .field("timestamp", &self.timestamp)
-            .field("text_type", &self.header.text_type())
+            .field("text_type", &self.header.text_type_or_err())
             .field("attempt", &self.header.attempt())
             .field("message", &String::from_utf8_lossy(&self.message))
             .finish()

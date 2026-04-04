@@ -94,3 +94,14 @@ impl<'a, P: SerDeser + Encryptable> VerifiablePayload for EncryptedMessageWithDs
         *array_ref![&mac, 0, 2] == self.mac
     }
 }
+
+impl<'a, P: SerDeser + Encryptable> core::fmt::Debug for EncryptedMessageWithDst<'a, P> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("EncryptedMessageWithDst")
+            .field("destination_hash", &self.destination_hash)
+            .field("source_hash", &self.source_hash)
+            .field("mac", &self.mac)
+            .field("ciphertext", &hex::encode(&self.ciphertext))
+            .finish()
+    }
+}
