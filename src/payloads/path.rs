@@ -88,7 +88,7 @@ impl<'a> ReturnedPath<'a> {
         &'d self,
     ) -> DecodeResult<P::Representation<'d>> {
         if let Some((extra_type, extra)) = self.extra.as_ref()
-            && P::PAYLOAD_TYPE != *extra_type
+            && P::PAYLOAD_TYPE == *extra_type
         {
             return P::decode(extra);
         }

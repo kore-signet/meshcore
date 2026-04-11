@@ -128,6 +128,13 @@ impl<const SIZE: usize> core::fmt::Debug for PathNode<SIZE> {
     }
 }
 
+#[cfg(feature = "defmt")]
+impl<const SIZE: usize> defmt::Format for PathNode<SIZE> {
+    fn format(&self, fmt: defmt::Formatter) {
+        defmt::write!(fmt, "{=[u8]:x}", self.0)
+    }
+}
+
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Path<'a> {
     pub mode: PathHashMode,
@@ -189,48 +196,6 @@ impl<'a> Path<'a> {
     }
 }
 
-struct PathDebug<'a, const SIZE: usize>(&'a [PathNode<SIZE>]);
-
-impl<'a, const SIZE: usize> core::fmt::Debug for PathDebug<'a, SIZE> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        if self.0.is_empty() {
-            write!(f, "direct")?;
-            return Ok(());
-        }
-
-        let mut iter = self.0.iter().peekable();
-        while let Some(val) = iter.next() {
-            write!(f, "{val:?}")?;
-            if iter.peek().is_some() {
-                write!(f, "->")?;
-            }
-        }
-
-        Ok(())
-    }
-}
-
-impl<'a> core::fmt::Debug for Path<'a> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        // let mut binding = f.debug_struct("Path");
-        // let fmt = binding.field("mode", &self.mode);
-        match self.mode {
-            PathHashMode::OneByte => {
-                write!(f, "{:?}", &PathDebug(self.view_as::<1>().unwrap()))
-            }
-            PathHashMode::TwoByte => {
-                write!(f, "{:?}", &PathDebug(self.view_as::<2>().unwrap()))
-            }
-            PathHashMode::ThreeByte => {
-                write!(f, "{:?}", &PathDebug(self.view_as::<3>().unwrap()))
-            }
-            PathHashMode::FourByte => {
-                write!(f, "{:?}", &PathDebug(self.view_as::<4>().unwrap()))
-            }
-        }
-        // .field("backing", &self.backing).finish()
-    }
-}
 
 pub struct Packet<'a> {
     pub header: PacketHeader,
@@ -375,6 +340,7 @@ pub struct PacketHeader {
     pub payload_version: B2,
 }
 
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Specifier, Debug)]
 #[bits = 2]
 pub enum RouteType {
@@ -390,6 +356,7 @@ impl RouteType {
     }
 }
 
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[derive(Specifier, Debug, PartialEq, Eq, Clone, Copy)]
 #[bits = 4]
 #[repr(u8)]
