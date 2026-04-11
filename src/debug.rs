@@ -20,11 +20,11 @@ impl<'a> defmt::Format for Packet<'a> {
         let mut sliced_buf = &mut hex_slice_buf[..self.payload.len() * 2];
         const_hex::encode_to_slice(&self.payload, &mut sliced_buf).unwrap();
 
-        defmt::write!(fmt, "<packet>\n");
-        defmt::write!(fmt, "header: {}\n", self.header);
-        defmt::write!(fmt, "path: {}\n", self.path);
-        defmt::write!(fmt, "payload: {=[u8]:a}\n", &sliced_buf);
-        defmt::write!(fmt, "</packet>\n");
+        defmt::write!(fmt, "Packet {{ \n");
+        defmt::write!(fmt, "\theader: {}\n", self.header);
+        defmt::write!(fmt, "\tpath: {}\n", self.path);
+        defmt::write!(fmt, "\tpayload: {=[u8]:a}\n", &sliced_buf);
+        defmt::write!(fmt, "}}");
     }
 }
 
