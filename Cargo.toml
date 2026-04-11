@@ -25,5 +25,5 @@ yoke = { version = "0.8.1", features = ["derive"] }
 defmt = { version = "1", optional = true }
 
 [features]
-default = []
+default = ["defmt"]
 defmt = ["dep:defmt"]

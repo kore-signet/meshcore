@@ -118,23 +118,6 @@ impl PathHashMode {
 #[repr(transparent)]
 pub struct PathNode<const SIZE: usize>(pub [u8; SIZE]);
 
-impl<const SIZE: usize> core::fmt::Debug for PathNode<SIZE> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(
-            f,
-            "{}",
-            const_hex::const_encode::<SIZE, false>(&self.0).as_str()
-        )
-    }
-}
-
-#[cfg(feature = "defmt")]
-impl<const SIZE: usize> defmt::Format for PathNode<SIZE> {
-    fn format(&self, fmt: defmt::Formatter) {
-        defmt::write!(fmt, "{=[u8]:x}", self.0)
-    }
-}
-
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Path<'a> {
     pub mode: PathHashMode,

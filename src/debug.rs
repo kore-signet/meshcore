@@ -16,11 +16,15 @@ impl<'a> Debug for Packet<'a> {
 #[cfg(feature = "defmt")]
 impl<'a> defmt::Format for Packet<'a> {
     fn format(&self, fmt: defmt::Formatter) {
-        defmt::write!(fmt, "<packet>");
-        defmt::write!(fmt, "header: {}", self.header);
-        defmt::write!(fmt, "path: {}", self.path);
-        defmt::write!(fmt, "payload: {=[u8]:x}", &self.payload);
-        defmt::write!(fmt, "</packet>");
+        let mut hex_slice_buf = [0u8; 512];
+        let mut sliced_buf = &mut hex_slice_buf[..self.payload.len() * 2];
+        const_hex::encode_to_slice(&self.payload, &mut sliced_buf).unwrap();
+
+        defmt::write!(fmt, "<packet>\n");
+        defmt::write!(fmt, "header: {}\n", self.header);
+        defmt::write!(fmt, "path: {}\n", self.path);
+        defmt::write!(fmt, "payload: {=[u8]:a}\n", &sliced_buf);
+        defmt::write!(fmt, "</packet>\n");
     }
 }
 
@@ -106,5 +110,23 @@ impl<'a> core::fmt::Debug for Path<'a> {
             }
         }
         // .field("backing", &self.backing).finish()
+    }
+}
+
+impl<const SIZE: usize> core::fmt::Debug for PathNode<SIZE> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(
+            f,
+            "{}",
+            const_hex::const_encode::<SIZE, false>(&self.0).as_str()
+        )
+    }
+}
+
+#[cfg(feature = "defmt")]
+impl<const SIZE: usize> defmt::Format for PathNode<SIZE> {
+    fn format(&self, fmt: defmt::Formatter) {
+        let node = const_hex::const_encode::<SIZE, false>(&self.0);
+        defmt::write!(fmt, "{=str}", node.as_str())
     }
 }
