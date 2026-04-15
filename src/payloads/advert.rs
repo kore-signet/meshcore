@@ -7,6 +7,7 @@ use bitflags::bitflags;
 use modular_bitfield::Specifier;
 use serde::{Deserialize, Serialize};
 
+#[derive(Clone)]
 pub struct Advert<'a> {
     pub public_key: [u8; 32],
     pub timestamp: u32,
@@ -63,6 +64,7 @@ impl<'a> SerDeser for Advert<'a> {
     }
 }
 
+#[derive(Clone)]
 pub struct AdvertisementExtraData<'a> {
     pub flags: AppdataFlags,
     pub latitude: Option<u32>,
