@@ -5,6 +5,7 @@ use crate::{
 use alloc::borrow::Cow;
 use bitflags::bitflags;
 use modular_bitfield::Specifier;
+use serde::{Deserialize, Serialize};
 
 pub struct Advert<'a> {
     pub public_key: [u8; 32],
@@ -71,7 +72,7 @@ pub struct AdvertisementExtraData<'a> {
     pub name: Option<Cow<'a, [u8]>>,
 }
 
-#[derive(Clone, Copy, Debug, Specifier)]
+#[derive(Clone, Copy, Debug, Specifier, Serialize, Deserialize)]
 #[repr(u8)]
 #[bits = 3]
 pub enum AdvertType {
