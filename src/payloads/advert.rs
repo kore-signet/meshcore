@@ -64,7 +64,7 @@ impl<'a> SerDeser for Advert<'a> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct AdvertisementExtraData<'a> {
     pub flags: AppdataFlags,
     pub latitude: Option<u32>,
@@ -86,7 +86,7 @@ pub enum AdvertType {
 }
 
 bitflags! {
-    #[derive(Copy, Clone, Debug)]
+    #[derive(Copy, Clone, Debug, Serialize, Deserialize)]
     pub struct AppdataFlags: u8 {
         const IS_CHAT_NODE = 0x01;
         const IS_REPEATER = 0x02;
